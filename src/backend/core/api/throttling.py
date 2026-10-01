@@ -20,6 +20,33 @@ class MonitoredUserRateThrottle(MonitoredThrottleMixin, UserRateThrottle):
     """Throttle for the monitored scoped rate throttle."""
 
 
+class RoomCreationUserRateThrottle(MonitoredUserRateThrottle):
+    """Throttle room creation per authenticated user.
+
+    Can be declared at the viewset level: every action other than "create"
+    is left unthrottled, so the same class can be reused on any viewset
+    exposing a room creation endpoint.
+    """
+
+    scope = "room_creation"
+
+    def get_cache_key(self, request, view):
+        """Throttle only room creations."""
+        if getattr(view, "action", None) != "create":
+            return None
+        return super().get_cache_key(request, view)
+
+
+class RoomCreationDailyUserRateThrottle(RoomCreationUserRateThrottle):
+    """Cap room creation per authenticated user over a day.
+
+    Complements the short-term RoomCreationUserRateThrottle, which absorbs
+    bursts but lets a user steadily create rooms over hours or days.
+    """
+
+    scope = "room_creation_daily"
+
+
 class RequestEntryAuthenticatedUserRateThrottle(MonitoredUserRateThrottle):
     """Throttle authenticated user requesting room entry"""
 

@@ -361,6 +361,16 @@ class Base(Configuration):
         "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.URLPathVersioning",
         "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
         "DEFAULT_THROTTLE_RATES": {
+            "room_creation": values.Value(
+                default="50/minute",
+                environ_name="ROOM_CREATION_THROTTLE_RATES",
+                environ_prefix=None,
+            ),
+            "room_creation_daily": values.Value(
+                default="1000/day",
+                environ_name="ROOM_CREATION_DAILY_THROTTLE_RATES",
+                environ_prefix=None,
+            ),
             "request_entry": values.Value(
                 default="150/minute",
                 environ_name="REQUEST_ENTRY_THROTTLE_RATES",
@@ -729,6 +739,9 @@ class Base(Configuration):
     )
     ALLOW_UNREGISTERED_ROOMS = values.BooleanValue(
         True, environ_name="ALLOW_UNREGISTERED_ROOMS", environ_prefix=None
+    )
+    ROOM_INACTIVITY_DELETION_DAYS = values.PositiveIntegerValue(
+        None, environ_name="ROOM_INACTIVITY_DELETION_DAYS", environ_prefix=None
     )
     # if provided, treat as suspicious (possible privilege escalation attempt).
     PARTICIPANT_FORBIDDEN_PERMISSION_FIELDS = values.ListValue(
@@ -1248,6 +1261,25 @@ class Base(Configuration):
                 UserWarning,
                 stacklevel=2,
             )
+
+        if cls.ROOM_INACTIVITY_DELETION_DAYS:
+            if not cls.RECORDING_EXPIRATION_DAYS:
+                warnings.warn(
+                    "ROOM_INACTIVITY_DELETION_DAYS is set but "
+                    "RECORDING_EXPIRATION_DAYS is not. Recordings never expire, so "
+                    "inactive rooms holding a saved recording will never be purged.",
+                    UserWarning,
+                    stacklevel=2,
+                )
+            elif cls.RECORDING_EXPIRATION_DAYS >= cls.ROOM_INACTIVITY_DELETION_DAYS:
+                warnings.warn(
+                    "RECORDING_EXPIRATION_DAYS is greater than or equal to "
+                    "ROOM_INACTIVITY_DELETION_DAYS. Inactive rooms holding a saved "
+                    "recording will be kept past the inactivity period, until their "
+                    "recordings expire.",
+                    UserWarning,
+                    stacklevel=2,
+                )
 
         # The SENTRY_DSN setting should be available to activate sentry for an environment
         if cls.SENTRY_DSN is not None:

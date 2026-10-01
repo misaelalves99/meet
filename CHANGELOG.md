@@ -8,6 +8,38 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+- 🔒(backend) throttle meeting link generation
+- 🔒️(backend) add a daily cap on room creation
+
+### Fixed
+
+- 🐛(frontend) allow mic testing while muted #804
+- 🐛(frontend) enforce recording-mode permissions on the checkboxes
+- 🔒️(agents) fix util-linux CVEs reported by Cyberwatch
+
+## [1.33.0] - 2026-09-30
+
+### Added
+
+- ✨(backend) purge rooms inactive for a configurable period
+- 🔨(makefile) add targets to list and download files stored in Garage
+
+### Changed
+
+- ⬆️(backend) update python dependencies
+- ⬆️(summary) update python dependencies
+- ⬆️(agents) update python dependencies
+- ♻️(agents) replace the minio client by boto3
+- 🔧(compose) replace MinIO by Garage for local development
+- 🔧(helm) point media services to Garage by default
+
+### Fixed
+
+- 🔒️(backend) fix critical and high CVEs in PyJWT
+- ⚡️(frontend) disable posthog-js periodic feature flag reloads
+
 ## [1.32.1] - 2026-09-25
 
 ### Fixed
@@ -374,7 +406,7 @@ and this project adheres to
 
 ### Fixed
 
-- ♿️(frontend) improve accessibilty of the Effects panel #1401
+- ♿️(frontend) improve accessibility of the Effects panel #1401
 
 ## [1.20.0] - 2026-06-12
 
